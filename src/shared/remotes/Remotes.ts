@@ -1,5 +1,5 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { REMOTE_NAMES } from "./RemoteNames";
+import { REMOTE_NAMES } from "./constants/RemoteNames";
 
 const getOrCreateRemote = (name: string): RemoteEvent => {
 	if (!RunService.IsServer()) return ReplicatedStorage.WaitForChild(name) as RemoteEvent;

@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { Remotes } from "shared/Remotes";
+import { Remotes } from "shared/remotes/Remotes";
 
 const BOND_GUI_NAME = "BondGui";
 

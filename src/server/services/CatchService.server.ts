@@ -1,8 +1,8 @@
 import { CollectionService } from "@rbxts/services";
-import { WILD_HORSE_TAG_NAME } from "server/TagNames";
+import { TAG_NAMES } from "shared/Constants";
 import { BREED_DATA } from "shared/data/BreedData";
 import { rollHorse } from "shared/HorseFactory";
-import { Remotes } from "shared/Remotes";
+import { Remotes } from "shared/remotes/Remotes";
 import { BreedDefinition, Rarity } from "shared/types/HorseTypes";
 
 interface BondSession {
@@ -77,10 +77,10 @@ const getBaseCatchParams = (rarity: Rarity): { duration: number; taps: number } 
 };
 
 // Hook every wild horse that already exists at the moment this script runs.
-CollectionService.GetTagged(WILD_HORSE_TAG_NAME).forEach(hookHorsePrompt);
+CollectionService.GetTagged(TAG_NAMES.WildHorse).forEach(hookHorsePrompt);
 
 // Hook every wild horse that gets spawned later, on an ongoing basis.
-CollectionService.GetInstanceAddedSignal(WILD_HORSE_TAG_NAME).Connect(hookHorsePrompt);
+CollectionService.GetInstanceAddedSignal(TAG_NAMES.WildHorse).Connect(hookHorsePrompt);
 
 // Listen if button clicked
 Remotes.BondTap.OnServerEvent.Connect((player) => {

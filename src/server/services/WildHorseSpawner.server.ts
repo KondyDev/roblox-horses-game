@@ -2,7 +2,7 @@ import { CollectionService, Workspace } from "@rbxts/services";
 import { BREED_DATA } from "shared/data/BreedData";
 import { BreedDefinition } from "shared/types/HorseTypes";
 import Object from "@rbxts/object-utils";
-import { WILD_HORSE_FOLDER_NAME, WILD_HORSE_TAG_NAME } from "server/TagNames";
+import { FOLDER_NAMES, TAG_NAMES } from "shared/Constants";
 
 const HORSE_SIZE = new Vector3(3, 4, 6);
 const MAX_SPAWN_ATTEMPTS = 10;
@@ -56,7 +56,7 @@ const createWildHorseModel = (breed: BreedDefinition): void => {
 	prompt.MaxActivationDistance = 8;
 	prompt.Parent = horse;
 
-	CollectionService.AddTag(horse, WILD_HORSE_TAG_NAME);
+	CollectionService.AddTag(horse, TAG_NAMES.WildHorse);
 };
 
 const spawnWildHorse = () => {
@@ -69,10 +69,10 @@ const spawnWildHorse = () => {
 };
 
 const getWildHorsesFolder = (): Folder => {
-	let folder = Workspace.FindFirstChild(WILD_HORSE_FOLDER_NAME) as Folder | undefined;
+	let folder = Workspace.FindFirstChild(FOLDER_NAMES.WildHorses) as Folder | undefined;
 	if (folder === undefined) {
 		folder = new Instance("Folder");
-		folder.Name = WILD_HORSE_FOLDER_NAME;
+		folder.Name = FOLDER_NAMES.WildHorses;
 		folder.Parent = Workspace;
 	}
 
@@ -83,7 +83,7 @@ const getWildHorsesFolder = (): Folder => {
 // Spawning Horse
 task.spawn(() => {
 	for (;;) {
-		const wildHorsesAmount: number = CollectionService.GetTagged(WILD_HORSE_TAG_NAME).size();
+		const wildHorsesAmount: number = CollectionService.GetTagged(TAG_NAMES.WildHorse).size();
 		if (wildHorsesAmount < 10) spawnWildHorse();
 
 		task.wait(5);
