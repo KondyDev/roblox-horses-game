@@ -1,17 +1,13 @@
 import { CollectionService } from "@rbxts/services";
+import { CatchSession } from "server/types/CatchTypes";
 import { TAG_NAMES } from "shared/Constants";
 import { BREED_DATA } from "shared/data/BreedData";
 import { rollHorse } from "shared/HorseFactory";
 import { Remotes } from "shared/remotes/Remotes";
 import { BreedDefinition, Rarity } from "shared/types/HorseTypes";
 
-interface BondSession {
-	horse: Instance;
-	breed: BreedDefinition;
-	requiredTaps: number;
-	tapsLanded: number;
-}
-const activeSessions = new Map<Player, BondSession>();
+const activeSessions = new Map<Player, CatchSession>();
+const tapHandlers = new Map<Player, () => void>();
 
 const hookHorsePrompt = (horse: Instance) => {
 	const prompt = horse.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined;
@@ -19,16 +15,34 @@ const hookHorsePrompt = (horse: Instance) => {
 
 	prompt.Triggered.Connect((player) => {
 		if (activeSessions.has(player)) return;
+		if (horse.GetAttribute("BeingCaught") === true) return;
 
 		const breedId = horse.GetAttribute("BreedId") as string;
 		const breed = BREED_DATA[breedId];
 		if (breed === undefined) return;
 
+		horse.SetAttribute("BeingCaught", true);
+
 		const { duration, requiredTaps } = getCatchParams(breed);
+
+		// --- tap-minigame-specific state, scoped to THIS catch attempt ---
+		let tapsLanded = 0;
+		let lastTapTime = os.clock();
+
+		tapHandlers.set(player, () => {
+			const now = os.clock();
+			if (now - lastTapTime >= 0.15) {
+				tapsLanded += 1;
+				lastTapTime = now;
+			}
+		});
+
+		const resolve = (): boolean => tapsLanded >= requiredTaps;
+		// --- end tap-minigame-specific state ---
 
 		Remotes.BondMinigameStart.FireClient(player, duration, requiredTaps, breed.displayName);
 
-		activeSessions.set(player, { horse, breed, requiredTaps, tapsLanded: 0 });
+		activeSessions.set(player, { horse, breed, resolve });
 		task.delay(duration, () => resolveSession(player));
 	});
 };
@@ -37,14 +51,18 @@ const resolveSession = (player: Player) => {
 	const session = activeSessions.get(player);
 	if (session === undefined) return;
 
+	session.horse.SetAttribute("BeingCaught", false);
 	activeSessions.delete(player);
-	const outcome = session.tapsLanded >= session.requiredTaps ? "success" : "fail";
+	tapHandlers.delete(player);
+
+	const outcome = session.resolve() ? "success" : "fail";
 
 	if (outcome === "success") {
 		const horse = rollHorse(session.breed.id);
 		print(
 			`Caught a ${session.breed.displayName}! Stats: speed=${horse.stats.speed}, stamina=${horse.stats.stamina}, temperament=${horse.stats.temperament}, jump=${horse.stats.jump}, aura=${horse.auraTier}`,
 		);
+
 		session.horse.Destroy();
 	} else {
 		print("Horse got away...");
@@ -84,8 +102,7 @@ CollectionService.GetInstanceAddedSignal(TAG_NAMES.WildHorse).Connect(hookHorseP
 
 // Listen if button clicked
 Remotes.BondTap.OnServerEvent.Connect((player) => {
-	const session = activeSessions.get(player);
-	if (session === undefined) return;
-
-	session.tapsLanded += 1;
+	const handler = tapHandlers.get(player);
+	if (handler === undefined) return;
+	handler();
 });
