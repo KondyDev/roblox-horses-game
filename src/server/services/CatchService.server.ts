@@ -1,4 +1,5 @@
 import { CollectionService } from "@rbxts/services";
+import { addCaughtHorse } from "server/PlayerData";
 import { CatchSession } from "server/types/CatchTypes";
 import { TAG_NAMES } from "shared/Constants";
 import { BREED_DATA } from "shared/data/BreedData";
@@ -63,6 +64,7 @@ const resolveSession = (player: Player) => {
 			`Caught a ${session.breed.displayName}! Stats: speed=${horse.stats.speed}, stamina=${horse.stats.stamina}, temperament=${horse.stats.temperament}, jump=${horse.stats.jump}, aura=${horse.auraTier}`,
 		);
 
+		addCaughtHorse(player, horse);
 		session.horse.Destroy();
 	} else {
 		print("Horse got away...");
