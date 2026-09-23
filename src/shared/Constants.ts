@@ -9,4 +9,5 @@ export const FOLDER_NAMES = {
 export const REMOTE_NAMES = {
 	BondMinigameStart: "BondMinigameStart",
 	BondTap: "BondTap",
+	PlayerHorsesUpdated: "PlayerHorsesUpdated",
 } as const;

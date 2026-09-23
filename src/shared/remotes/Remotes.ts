@@ -18,4 +18,5 @@ const getOrCreateRemote = (name: string): RemoteEvent => {
 export const Remotes = {
 	BondMinigameStart: getOrCreateRemote(REMOTE_NAMES.BondMinigameStart),
 	BondTap: getOrCreateRemote(REMOTE_NAMES.BondTap),
+	PlayerHorsesUpdated: getOrCreateRemote(REMOTE_NAMES.PlayerHorsesUpdated),
 };

@@ -1,6 +1,7 @@
 import { DataStoreService, Players } from "@rbxts/services";
 import { PlayerHorseData } from "./types/PlayerTypes";
 import { HorseInstanceData } from "shared/types/HorseTypes";
+import { Remotes } from "shared/remotes/Remotes";
 
 const DEFAULT_DATA: PlayerHorseData = { horses: [], coins: 0 };
 
@@ -15,6 +16,9 @@ export const loadPlayerData = (player: Player) => {
 	else if (!success) warn(`Failed to load data for ${player.Name}: ${result}`);
 
 	playerData.set(player, data ?? { horses: [], coins: DEFAULT_DATA.coins });
+
+	const loaded = playerData.get(player)!;
+	Remotes.PlayerHorsesUpdated.FireClient(player, loaded.horses);
 };
 
 export const savePlayerData = (player: Player) => {

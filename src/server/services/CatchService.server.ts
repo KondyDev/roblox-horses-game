@@ -1,5 +1,5 @@
 import { CollectionService } from "@rbxts/services";
-import { addCaughtHorse } from "server/PlayerData";
+import { addCaughtHorse, getPlayerData } from "server/PlayerData";
 import { CatchSession } from "server/types/CatchTypes";
 import { TAG_NAMES } from "shared/Constants";
 import { BREED_DATA } from "shared/data/BreedData";
@@ -65,6 +65,10 @@ const resolveSession = (player: Player) => {
 		);
 
 		addCaughtHorse(player, horse);
+
+		const data = getPlayerData(player);
+		if (data !== undefined) Remotes.PlayerHorsesUpdated.FireClient(player, data.horses);
+
 		session.horse.Destroy();
 	} else {
 		print("Horse got away...");
