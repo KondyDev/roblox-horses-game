@@ -29,5 +29,11 @@
 		"@rbxts/react": "^17.3.7-ts.2",
 		"@rbxts/react-roblox": "^17.3.7-ts.2",
 		"@rbxts/services": "^1.6.0"
+	},
+	"node_modules": {
+		"$className": "Folder",
+		"@rbxts": {
+			"$path": "node_modules/@rbxts"
+		}
 	}
 }

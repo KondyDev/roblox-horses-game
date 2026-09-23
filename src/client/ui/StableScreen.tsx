@@ -14,11 +14,9 @@ const StableScreen = () => {
 		});
 
 		const inputConnection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
-			print("toggle fired:", isOpen);
+			print("toggle fired:", isOpen, input.UserInputType, input.KeyCode);
 			if (gameProcessed) return; // ignore if typing in a textbox etc.
-			if (input.KeyCode === Enum.KeyCode.I) {
-				setIsOpen((prev) => !prev);
-			}
+			if (input.KeyCode === Enum.KeyCode.B) setIsOpen((prev) => !prev); // TODO: maybe change input
 		});
 
 		return () => {
@@ -32,7 +30,7 @@ const StableScreen = () => {
 	return (
 		<frame
 			Size={new UDim2(0, 400, 0, 500)}
-			Position={new UDim2(0.5, -200, 0.5, -250)}
+			Position={new UDim2(0.5, 0, 0.5, 0)}
 			AnchorPoint={new Vector2(0.5, 0.5)}
 		>
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 4)} />
