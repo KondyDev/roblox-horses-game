@@ -3,7 +3,7 @@ import { Remotes } from "shared/remotes/Remotes";
 
 const BOND_GUI_NAME = "BondGui";
 
-Remotes.BondMinigameStart.OnClientEvent.Connect((duration, requiredTaps, lastTapTime, breedName) => {
+Remotes.BondMinigameStart.OnClientEvent.Connect((duration, requiredTaps, breedName) => {
 	print(`Bond started: ${breedName}, ${duration}s, ${requiredTaps} taps needed.`);
 
 	const player = Players.LocalPlayer;

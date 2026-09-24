@@ -40,6 +40,13 @@ export const getPlayerData = (player: Player): PlayerHorseData | undefined => {
 	return playerData.get(player);
 };
 
+Players.PlayerAdded.Connect(loadPlayerData);
+
+Players.PlayerRemoving.Connect((player) => {
+	savePlayerData(player);
+	playerData.delete(player);
+});
+
 Players.PlayerRemoving.Connect((player) => {
 	savePlayerData(player);
 	playerData.delete(player);

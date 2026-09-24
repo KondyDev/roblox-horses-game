@@ -9,12 +9,14 @@ const StableScreen = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	useEffect(() => {
-		const dataConnection = Remotes.PlayerHorsesUpdated.OnClientEvent.Connect((updatedHorses) => {
-			setHorses(updatedHorses);
-		});
+		const dataConnection = Remotes.PlayerHorsesUpdated.OnClientEvent.Connect(
+			(updatedHorses: HorseInstanceData[]) => {
+				print("client received horses, count:", updatedHorses.size());
+				setHorses(updatedHorses);
+			},
+		);
 
 		const inputConnection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
-			print("toggle fired:", isOpen, input.UserInputType, input.KeyCode);
 			if (gameProcessed) return; // ignore if typing in a textbox etc.
 			if (input.KeyCode === Enum.KeyCode.B) setIsOpen((prev) => !prev); // TODO: maybe change input
 		});
