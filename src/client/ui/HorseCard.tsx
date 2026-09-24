@@ -1,63 +1,67 @@
 import React from "@rbxts/react";
 import { BREED_DATA } from "shared/data/BreedData";
-import { AuraTier, HorseInstanceData } from "shared/types/HorseTypes";
+import { AuraTier } from "shared/types/HorseTypes";
 import { RARITY_COLORS } from "./rarityColors";
+import { HorseCardProps } from "client/types/Horse";
 
-const HorseCard = ({ horse }: { horse: HorseInstanceData }) => {
+const HorseCard = ({ horse, onSelect, isSelected }: HorseCardProps) => {
 	const breed = BREED_DATA[horse.breedId];
 	const rarityColor = RARITY_COLORS[breed.rarity];
 
 	return (
-		<frame Size={new UDim2(1, 0, 0, 80)} BackgroundColor3={Color3.fromRGB(40, 40, 45)}>
+		<textbutton
+			Size={new UDim2(1, 0, 0, 80)}
+			BackgroundColor3={Color3.fromRGB(40, 40, 45)}
+			Text=""
+			AutoButtonColor={false}
+			Event={{ MouseButton1Click: onSelect }}
+		>
 			<uicorner CornerRadius={new UDim(0, 8)} />
-			<uistroke Color={rarityColor} Thickness={2} />
+			<uistroke Color={isSelected ? Color3.fromRGB(255, 255, 255) : rarityColor} Thickness={isSelected ? 3 : 2} />
+			<uipadding
+				PaddingTop={new UDim(0, 10)}
+				PaddingBottom={new UDim(0, 10)}
+				PaddingLeft={new UDim(0, 10)}
+				PaddingRight={new UDim(0, 10)}
+			/>
+			<uilistlayout
+				FillDirection={Enum.FillDirection.Horizontal}
+				VerticalAlignment={Enum.VerticalAlignment.Center}
+				Padding={new UDim(0, 10)}
+			/>
 
-			{/* coat swatch */}
-			<frame Size={new UDim2(0, 50, 0, 50)} Position={new UDim2(0, 10, 0.5, -25)} BackgroundColor3={horse.color}>
+			{/* coat swatch — fixed size, doesn't stretch */}
+			<frame Size={new UDim2(0, 50, 0, 50)} BackgroundColor3={horse.color}>
 				<uicorner CornerRadius={new UDim(0, 6)} />
 			</frame>
 
-			{/* name & rarity */}
-			<textlabel
-				Size={new UDim2(1, -140, 0, 24)}
-				Position={new UDim2(0, 70, 0, 10)}
-				BackgroundTransparency={1}
-				Text={breed.displayName}
-				TextColor3={Color3.fromRGB(255, 255, 255)}
-				TextXAlignment={Enum.TextXAlignment.Left}
-				Font={Enum.Font.GothamBold}
-				TextSize={18}
-			/>
-			<textlabel
-				Size={new UDim2(1, -140, 0, 18)}
-				Position={new UDim2(0, 70, 0, 36)}
-				BackgroundTransparency={1}
-				Text={breed.rarity}
-				TextColor3={rarityColor}
-				TextXAlignment={Enum.TextXAlignment.Left}
-				Font={Enum.Font.Gotham}
-				TextSize={14}
-			/>
-
-			{/* aura badge */}
-			{horse.auraTier !== AuraTier.None && (
+			{/* text column — takes remaining space automatically */}
+			<frame Size={new UDim2(1, -60, 1, 0)} BackgroundTransparency={1}>
+				<uilistlayout
+					FillDirection={Enum.FillDirection.Vertical}
+					VerticalAlignment={Enum.VerticalAlignment.Center}
+				/>
 				<textlabel
-					Size={new UDim2(0, 60, 0, 20)}
-					Position={new UDim2(1, -70, 0, 10)}
-					BackgroundColor3={
-						horse.auraTier === AuraTier.Mystic
-							? Color3.fromRGB(255, 80, 200)
-							: Color3.fromRGB(255, 240, 120)
-					}
-					Text={horse.auraTier}
-					TextColor3={Color3.fromRGB(20, 20, 20)}
+					Size={new UDim2(1, 0, 0, 20)}
+					BackgroundTransparency={1}
+					Text={breed.displayName}
+					TextColor3={Color3.fromRGB(255, 255, 255)}
+					TextXAlignment={Enum.TextXAlignment.Left}
+					TextTruncate={Enum.TextTruncate.AtEnd}
 					Font={Enum.Font.GothamBold}
-					TextSize={12}
-				>
-					<uicorner CornerRadius={new UDim(0, 4)} />
-				</textlabel>
-			)}
-		</frame>
+					TextSize={16}
+				/>
+				<textlabel
+					Size={new UDim2(1, 0, 0, 16)}
+					BackgroundTransparency={1}
+					Text={breed.rarity}
+					TextColor3={rarityColor}
+					TextXAlignment={Enum.TextXAlignment.Left}
+					Font={Enum.Font.Gotham}
+					TextSize={13}
+				/>
+			</frame>
+		</textbutton>
 	);
 };
 

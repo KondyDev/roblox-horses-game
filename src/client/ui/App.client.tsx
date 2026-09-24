@@ -1,8 +1,9 @@
 import React, { StrictMode } from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
-import { Players } from "@rbxts/services";
+import { GuiService, Players } from "@rbxts/services";
 import StableScreen from "./StableScreen";
 
+GuiService.AutoSelectGuiEnabled = false;
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui");
 
 const screenGui = new Instance("ScreenGui");
