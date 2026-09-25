@@ -3,6 +3,7 @@ import { Remotes } from "shared/remotes/Remotes";
 import { HorseInstanceData } from "shared/types/HorseTypes";
 import HorseCard from "./HorseCard";
 import { UserInputService } from "@rbxts/services";
+import HorseInfoPanel from "./HorseInfoPanel";
 
 type ViewMode = "list" | "grid";
 
@@ -94,10 +95,8 @@ const StableScreen = () => {
 				BackgroundColor3={Color3.fromRGB(24, 24, 28)}
 			>
 				<uicorner CornerRadius={new UDim(0, 10)} />
-				<frame>
-					<uicorner CornerRadius={new UDim(0, 10)} />
-					{/* <HorseInfoPanel horse={selectedHorse} /> */}
-				</frame>
+				<uicorner CornerRadius={new UDim(0, 10)} />
+				<HorseInfoPanel horse={selectedHorse} />
 			</frame>
 		</frame>
 	);

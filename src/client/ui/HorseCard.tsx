@@ -1,6 +1,5 @@
 import React from "@rbxts/react";
 import { BREED_DATA } from "shared/data/BreedData";
-import { AuraTier } from "shared/types/HorseTypes";
 import { RARITY_COLORS } from "./rarityColors";
 import { HorseCardProps } from "client/types/Horse";
 
