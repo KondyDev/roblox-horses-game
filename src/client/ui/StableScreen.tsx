@@ -95,7 +95,6 @@ const StableScreen = () => {
 				BackgroundColor3={Color3.fromRGB(24, 24, 28)}
 			>
 				<uicorner CornerRadius={new UDim(0, 10)} />
-				<uicorner CornerRadius={new UDim(0, 10)} />
 				<HorseInfoPanel horse={selectedHorse} />
 			</frame>
 		</frame>

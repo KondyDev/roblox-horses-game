@@ -4,11 +4,17 @@ import { RARITY_COLORS } from "./rarityColors";
 import { HorseCardProps } from "client/types/Horse";
 import { ReplicatedStorage } from "@rbxts/services";
 import { frameHorseInViewport, prepareHorseModel } from "shared/utils/HorseVisuals";
+import { AURA_STYLES } from "./auraStyles";
+import { useAuraAnimation } from "client/hooks/useAuraAnimation";
 
 const HorseCard = ({ horse, onSelect, isSelected }: HorseCardProps) => {
 	const breed = BREED_DATA[horse.breedId];
 	const rarityColor = RARITY_COLORS[breed.rarity];
 	const viewportRef = useRef<ViewportFrame>();
+	const auraStyle = AURA_STYLES[horse.auraTier];
+	const strokeRef = useRef<UIStroke>();
+	const gradientRef = useRef<UIGradient>();
+	useAuraAnimation(gradientRef, strokeRef, auraStyle);
 
 	useEffect(() => {
 		const viewport = viewportRef.current;
@@ -46,7 +52,14 @@ const HorseCard = ({ horse, onSelect, isSelected }: HorseCardProps) => {
 			Event={{ MouseButton1Click: onSelect }}
 		>
 			<uicorner CornerRadius={new UDim(0, 8)} />
-			<uistroke Color={isSelected ? Color3.fromRGB(255, 255, 255) : rarityColor} Thickness={isSelected ? 3 : 2} />
+			<uistroke
+				ref={strokeRef}
+				ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+				Color={auraStyle !== undefined || isSelected ? Color3.fromRGB(255, 255, 255) : rarityColor}
+				Thickness={isSelected ? 3 : 2}
+			>
+				{auraStyle !== undefined && <uigradient ref={gradientRef} Color={auraStyle.colors} />}
+			</uistroke>
 			<uipadding
 				PaddingTop={new UDim(0, 10)}
 				PaddingBottom={new UDim(0, 10)}

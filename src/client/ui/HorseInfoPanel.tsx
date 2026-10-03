@@ -4,15 +4,21 @@ import { AuraTier, HorseInstanceData } from "shared/types/HorseTypes";
 import { RARITY_COLORS } from "./rarityColors";
 import { ReplicatedStorage } from "@rbxts/services";
 import { frameHorseInViewport, prepareHorseModel } from "shared/utils/HorseVisuals";
+import { useAuraAnimation } from "client/hooks/useAuraAnimation";
+import { AURA_STYLES } from "./auraStyles";
 
 const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => {
 	const viewportRef = useRef<ViewportFrame>();
+	const auraStyle = horse !== undefined ? AURA_STYLES[horse.auraTier] : undefined;
+	const strokeRef = useRef<UIStroke>();
+	const gradientRef = useRef<UIGradient>();
+	useAuraAnimation(gradientRef, strokeRef, auraStyle);
 
 	useEffect(() => {
 		const viewport = viewportRef.current;
 		if (viewport === undefined || horse === undefined) return;
 
-		viewport.ClearAllChildren();
+		// viewport.ClearAllChildren();
 
 		viewport.Ambient = Color3.fromRGB(150, 150, 150);
 		viewport.LightColor = Color3.fromRGB(255, 255, 255);
@@ -28,6 +34,7 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 
 		if (horseTemplate === undefined) {
 			warn(`Missing horse model for breed: ${horse.breedId}`);
+			camera.Destroy();
 			return;
 		}
 
@@ -37,7 +44,10 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 
 		frameHorseInViewport(horseModel, camera);
 
-		return () => viewport.ClearAllChildren();
+		return () => {
+			horseModel.Destroy();
+			camera.Destroy();
+		};
 	}, [horse?.id]);
 
 	if (horse === undefined) {
@@ -68,7 +78,11 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 				PaddingTop={new UDim(0, 12)}
 				PaddingBottom={new UDim(0, 12)}
 			/>
-			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 10)} />
+			<uilistlayout
+				FillDirection={Enum.FillDirection.Vertical}
+				Padding={new UDim(0, 10)}
+				SortOrder={Enum.SortOrder.LayoutOrder}
+			/>
 
 			<viewportframe
 				ref={viewportRef}
@@ -76,6 +90,9 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 				BackgroundColor3={Color3.fromRGB(15, 15, 18)}
 			>
 				<uicorner CornerRadius={new UDim(0, 10)} />
+				<uistroke ref={strokeRef} Color={Color3.fromRGB(255, 255, 255)} Thickness={3}>
+					{auraStyle !== undefined && <uigradient ref={gradientRef} Color={auraStyle.colors} />}
+				</uistroke>
 			</viewportframe>
 
 			<textlabel
@@ -99,20 +116,29 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 					Font={Enum.Font.GothamBold}
 					TextSize={14}
 				/>
-				{horse.auraTier !== AuraTier.None && (
-					<textlabel
-						AutomaticSize={Enum.AutomaticSize.X}
-						Size={new UDim2(0, 0, 1, 0)}
-						BackgroundTransparency={1}
-						Text={`✦ ${horse.auraTier}`}
-						TextColor3={
-							horse.auraTier === AuraTier.Mystic
-								? Color3.fromRGB(255, 80, 200)
-								: Color3.fromRGB(255, 220, 100)
-						}
-						Font={Enum.Font.GothamBold}
-						TextSize={14}
-					/>
+				{auraStyle !== undefined && (
+					<frame AutomaticSize={Enum.AutomaticSize.X} Size={new UDim2(0, 0, 1, 0)} BackgroundTransparency={1}>
+						<uilistlayout
+							FillDirection={Enum.FillDirection.Horizontal}
+							VerticalAlignment={Enum.VerticalAlignment.Center}
+							Padding={new UDim(0, 4)}
+						/>
+						<imagelabel
+							Size={new UDim2(0, 14, 0, 14)}
+							BackgroundTransparency={1}
+							Image="rbxassetid://112585867598001"
+							ImageColor3={auraStyle.accent}
+						/>
+						<textlabel
+							AutomaticSize={Enum.AutomaticSize.X}
+							Size={new UDim2(0, 0, 1, 0)}
+							BackgroundTransparency={1}
+							Text={horse.auraTier}
+							TextColor3={auraStyle.accent}
+							Font={Enum.Font.GothamBold}
+							TextSize={14}
+						/>
+					</frame>
 				)}
 			</frame>
 
@@ -120,6 +146,17 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 			<StatBar label="Stamina" value={horse.stats.stamina} />
 			<StatBar label="Temperament" value={horse.stats.temperament} />
 			<StatBar label="Jump" value={horse.stats.jump} />
+
+			<textbutton
+				Size={new UDim2(1, 0, 0, 32)}
+				BackgroundColor3={Color3.fromRGB(60, 60, 68)}
+				Text="Summon Horse"
+				TextColor3={Color3.fromRGB(255, 255, 255)}
+				Font={Enum.Font.Gotham}
+				TextSize={14}
+			>
+				<uicorner CornerRadius={new UDim(0, 10)} />
+			</textbutton>
 		</frame>
 	);
 };
