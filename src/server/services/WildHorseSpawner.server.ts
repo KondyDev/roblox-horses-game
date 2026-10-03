@@ -1,20 +1,26 @@
-import { CollectionService, Workspace } from "@rbxts/services";
+import { CollectionService, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { BREED_DATA } from "shared/data/BreedData";
 import { BreedDefinition } from "shared/types/HorseTypes";
 import Object from "@rbxts/object-utils";
 import { FOLDER_NAMES, TAG_NAMES } from "shared/Constants";
 
-const HORSE_SIZE = new Vector3(3, 4, 6);
+const HORSE_SIZE = new Vector3(6, 16, 18); // koń ~4.4 x 13 x 16, z zapasem
 const MAX_SPAWN_ATTEMPTS = 10;
 
 // POSITION -----------------------------------------------------------
 const spawnPoints: Vector3[] = [
-	new Vector3(0, 3, 0),
-	new Vector3(10, 3, 0),
-	new Vector3(0, 3, 10),
-	new Vector3(10, 3, 10),
-	new Vector3(5, 3, 15),
-	new Vector3(0, 3, 20),
+	new Vector3(0, 5, 0),
+	new Vector3(10, 5, 0),
+	new Vector3(0, 5, 10),
+	new Vector3(10, 5, 10),
+	new Vector3(5, 5, 15),
+	new Vector3(0, 5, 20),
+	new Vector3(20, 5, 0),
+	new Vector3(20, 5, 10),
+	new Vector3(15, 5, 20),
+	new Vector3(-10, 5, 5),
+	new Vector3(-10, 5, 15),
+	new Vector3(15, 5, -5),
 ];
 
 const pickSpawnPosition = (): Vector3 | undefined => {
@@ -31,41 +37,69 @@ const pickSpawnPosition = (): Vector3 | undefined => {
 // TODO: na pozniej - sprawdzac granice gry, bo teraz moze tez w ziemi jakby wzgórza byly
 const isPositionClear = (position: Vector3): boolean => {
 	const overlapParams = new OverlapParams();
-	const checkSize = HORSE_SIZE;
+	overlapParams.FilterType = Enum.RaycastFilterType.Include;
+	overlapParams.FilterDescendantsInstances = [getWildHorsesFolder()];
 
-	const overlapping = Workspace.GetPartBoundsInBox(new CFrame(position), checkSize, overlapParams);
+	const overlapping = Workspace.GetPartBoundsInBox(new CFrame(position), HORSE_SIZE, overlapParams);
 	return overlapping.size() === 0;
 };
 // -----------------------------------------------------------------------
 
 // SPAWN & CREATE --------------------------------------------------------
-const createWildHorseModel = (breed: BreedDefinition): void => {
-	const horse = new Instance("Part");
+const createWildHorseModel = (breed: BreedDefinition, spawnPosition: Vector3): void => {
+	const horsesFolder = ReplicatedStorage.FindFirstChild("HorsesModels");
+	const horseTemplate = horsesFolder?.FindFirstChild(breed.id) as Model | undefined;
 
+	if (horseTemplate === undefined) {
+		warn(`Missing horse model for breed: ${breed.id}`);
+		return;
+	}
+
+	const horse = horseTemplate.Clone();
 	horse.Name = breed.displayName;
-	horse.Position = pickSpawnPosition() || new Vector3(0, 6, 0); // TODO: bez default pozycji jak zrobie respienie na mapie randomowo
-	horse.Size = HORSE_SIZE;
-	horse.Color = breed.colorOptions[math.random(0, breed.colorOptions.size() - 1)];
-	horse.Anchored = true;
-	horse.SetAttribute("BreedId", breed.id);
-	horse.Parent = getWildHorsesFolder();
+
+	const coatFolder = horse.FindFirstChild("Coat");
+	const promptAttachment = horse.FindFirstChild("Root")?.FindFirstChild("PromptAttachment");
+	if (coatFolder === undefined || promptAttachment === undefined) {
+		warn(`Horse model ${breed.id} is missing Coat folder or Root/PromptAttachment`);
+		horse.Destroy();
+		return;
+	}
+
+	horse.PivotTo(new CFrame(spawnPosition));
+
+	horse.GetDescendants().forEach((descendant) => {
+		if (descendant.IsA("BasePart")) descendant.Anchored = true;
+	});
+
+	const coatColor = breed.colorOptions[math.random(0, breed.colorOptions.size() - 1)];
+	coatFolder.GetChildren().forEach((part) => {
+		if (part.IsA("BasePart")) part.Color = coatColor;
+	});
 
 	const prompt = new Instance("ProximityPrompt");
 	prompt.ActionText = "Bond";
 	prompt.ObjectText = breed.displayName;
 	prompt.MaxActivationDistance = 8;
-	prompt.Parent = horse;
+	prompt.Parent = promptAttachment;
 
+	horse.SetAttribute("BreedId", breed.id);
+	horse.Parent = getWildHorsesFolder();
 	CollectionService.AddTag(horse, TAG_NAMES.WildHorse);
+
+	print(`Spawned ${breed.displayName} at ${spawnPosition}...`);
 };
 
 const spawnWildHorse = () => {
+	const spawnPosition = pickSpawnPosition();
+	if (spawnPosition === undefined) return;
+
 	const breedIds = Object.keys(BREED_DATA);
 	const randomIndex = math.random(0, breedIds.size() - 1);
 	const randomBreedId = breedIds[randomIndex];
 	const randomBreed = BREED_DATA[randomBreedId];
 
-	createWildHorseModel(randomBreed);
+	createWildHorseModel(randomBreed, spawnPosition);
 };
 
 const getWildHorsesFolder = (): Folder => {

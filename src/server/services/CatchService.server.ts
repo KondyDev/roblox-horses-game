@@ -11,7 +11,7 @@ const activeSessions = new Map<Player, CatchSession>();
 const tapHandlers = new Map<Player, () => void>();
 
 const hookHorsePrompt = (horse: Instance) => {
-	const prompt = horse.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined;
+	const prompt = horse.FindFirstChild("ProximityPrompt", true) as ProximityPrompt | undefined;
 	if (prompt === undefined) return;
 
 	prompt.Triggered.Connect((player) => {
