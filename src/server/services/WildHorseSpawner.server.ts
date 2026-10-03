@@ -3,6 +3,7 @@ import { BREED_DATA } from "shared/data/BreedData";
 import { BreedDefinition } from "shared/types/HorseTypes";
 import Object from "@rbxts/object-utils";
 import { FOLDER_NAMES, TAG_NAMES } from "shared/Constants";
+import { prepareHorseModel } from "shared/utils/HorseVisuals";
 
 const HORSE_SIZE = new Vector3(6, 16, 18); // koń ~4.4 x 13 x 16, z zapasem
 const MAX_SPAWN_ATTEMPTS = 10;
@@ -55,27 +56,18 @@ const createWildHorseModel = (breed: BreedDefinition, spawnPosition: Vector3): v
 		return;
 	}
 
-	const horse = horseTemplate.Clone();
+	const coatColor = breed.colorOptions[math.random(0, breed.colorOptions.size() - 1)];
+	const horse = prepareHorseModel(horseTemplate, coatColor);
 	horse.Name = breed.displayName;
 
-	const coatFolder = horse.FindFirstChild("Coat");
 	const promptAttachment = horse.FindFirstChild("Root")?.FindFirstChild("PromptAttachment");
-	if (coatFolder === undefined || promptAttachment === undefined) {
-		warn(`Horse model ${breed.id} is missing Coat folder or Root/PromptAttachment`);
+	if (promptAttachment === undefined) {
+		warn(`Horse model ${breed.id} is missing Root/PromptAttachment`);
 		horse.Destroy();
 		return;
 	}
 
 	horse.PivotTo(new CFrame(spawnPosition));
-
-	horse.GetDescendants().forEach((descendant) => {
-		if (descendant.IsA("BasePart")) descendant.Anchored = true;
-	});
-
-	const coatColor = breed.colorOptions[math.random(0, breed.colorOptions.size() - 1)];
-	coatFolder.GetChildren().forEach((part) => {
-		if (part.IsA("BasePart")) part.Color = coatColor;
-	});
 
 	const prompt = new Instance("ProximityPrompt");
 	prompt.ActionText = "Bond";

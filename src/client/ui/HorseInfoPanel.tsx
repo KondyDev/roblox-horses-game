@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "@rbxts/react";
 import { BREED_DATA } from "shared/data/BreedData";
 import { AuraTier, HorseInstanceData } from "shared/types/HorseTypes";
 import { RARITY_COLORS } from "./rarityColors";
+import { ReplicatedStorage } from "@rbxts/services";
+import { frameHorseInViewport, prepareHorseModel } from "shared/utils/HorseVisuals";
 
 const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => {
 	const viewportRef = useRef<ViewportFrame>();
@@ -21,16 +23,19 @@ const HorseInfoPanel = ({ horse }: { horse: HorseInstanceData | undefined }) => 
 		camera.Parent = viewport;
 		viewport.CurrentCamera = camera;
 
-		// --- PLACEHOLDER ---
-		const placeholder = new Instance("Part");
-		placeholder.Size = new Vector3(2, 3, 4);
-		placeholder.Color = horse.color;
-		placeholder.Anchored = true;
-		placeholder.Position = new Vector3(0, 0, 0);
-		placeholder.Parent = viewport;
+		const horseFolder = ReplicatedStorage.FindFirstChild("HorsesModels");
+		const horseTemplate = horseFolder?.FindFirstChild(horse.breedId) as Model | undefined;
 
-		camera.CFrame = CFrame.lookAt(new Vector3(5, 3, 5), placeholder.Position);
-		// --- end placeholder ---
+		if (horseTemplate === undefined) {
+			warn(`Missing horse model for breed: ${horse.breedId}`);
+			return;
+		}
+
+		const horseModel = prepareHorseModel(horseTemplate, horse.color);
+		horseModel.Parent = viewport;
+		horseModel.PivotTo(new CFrame(Vector3.zero));
+
+		frameHorseInViewport(horseModel, camera);
 
 		return () => viewport.ClearAllChildren();
 	}, [horse?.id]);
